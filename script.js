@@ -17,6 +17,27 @@ addEventListener('scroll', horizontalScroll, { passive: true });
 addEventListener('resize', horizontalScroll);
 horizontalScroll();
 
+// 데스크톱에서는 중간 프레임에 멈추지 않고 슬라이드 단위로만 이동합니다.
+let slideLock = false;
+addEventListener('wheel', (event) => {
+  if (innerWidth <= 760 || slideLock || Math.abs(event.deltaY) < 4) return;
+
+  const start = zone.offsetTop;
+  const maxScroll = zone.offsetHeight - innerHeight;
+  const end = start + maxScroll;
+  const withinZone = scrollY >= start - 2 && scrollY <= end + 2;
+  if (!withinZone) return;
+
+  const current = Math.round(((scrollY - start) / maxScroll) * (slides.length - 1));
+  const next = Math.max(0, Math.min(slides.length - 1, current + (event.deltaY > 0 ? 1 : -1)));
+  if (next === current) return;
+
+  event.preventDefault();
+  slideLock = true;
+  scrollTo({ top: start + (maxScroll * next) / (slides.length - 1), behavior: 'smooth' });
+  setTimeout(() => { slideLock = false; }, 650);
+}, { passive: false });
+
 const aboutContent = document.querySelector('.about-content');
 aboutContent.innerHTML = `<p class="path">Macintosh HD / Users / Sanghyun</p><p class="intro-status">● CURRENTLY AT ESTGAMES</p><h1>이상현<br><em>인프라·네트워크</em><br>운영 담당자</h1><p class="role-summary"><strong>총 5년 경력</strong>의 IT 인프라 운영 담당자입니다. 사내 네트워크와 업무 시스템을 안정적으로 운영하고, 반복 업무는 자동화와 웹 서비스로 개선합니다.</p><div class="profile-facts"><span><b>FOCUS</b> Network · Firewall · Infrastructure</span><span><b>STACK</b> Docker · Linux · Nginx · FastAPI</span></div>`;
 aboutContent.querySelector('h1').innerHTML = `현장과 시스템을 잇는<br><em>네트워크·인프라</em><br>운영 담당자`;
@@ -143,7 +164,7 @@ projectGridStyles.textContent += `.project-window-modal:has(.diagram-wide){width
 
 document.querySelector('.dock')?.remove();
 const contactContent = document.querySelector('.contact-content');
-contactContent.innerHTML = `<div class="profile-photo-wrap"><img src="./profile-photo.png" alt="이상현 프로필 사진"></div><div class="profile-copy"><p class="contact-kicker">LET'S WORK TOGETHER</p><h2>새로운 문제를<br>함께 풀어볼까요?</h2><p class="profile-name">이상현 <span>Infrastructure & Network Operations</span></p><a href="mailto:aromad1117@naver.com">aromad1117@naver.com</a><a href="tel:01066850145">010 6685 0145</a></div>`;
+contactContent.innerHTML = `<div class="profile-photo-wrap"><img src="./profile-photo.png" alt="이상현 프로필 사진"></div><div class="profile-copy"><p class="contact-kicker">LET'S WORK TOGETHER</p><h2>더 나은 업무는<br>안정적인 인프라에서 시작됩니다.</h2><p class="profile-name">이상현 <span>Infrastructure & Network Operations</span></p><a href="mailto:aromad1117@naver.com">aromad1117@naver.com</a><a href="tel:01066850145">010 6685 0145</a></div>`;
 const finalContactStyles = document.createElement('style');
 finalContactStyles.textContent = `.closing-slide{background:linear-gradient(135deg,#bddcff,#a7b9fa 49%,#c8a8ed)}.contact-card{width:min(820px,90vw);background:#f8f9fdde}.contact-content{padding:38px 48px;display:grid;grid-template-columns:285px 1fr;gap:44px;text-align:left;align-items:center}.profile-photo-wrap{height:330px;border-radius:18px;overflow:hidden;background:#dce3f3;box-shadow:0 14px 30px #37467c30}.profile-photo-wrap img{width:100%;height:100%;object-fit:cover;object-position:center}.contact-kicker{font-size:11px!important;letter-spacing:.12em!important;color:#6577bd!important;margin:0 0 16px!important}.profile-copy h2{font-size:clamp(37px,4vw,55px)!important;line-height:.96!important;letter-spacing:-.07em!important;margin:0 0 24px!important}.profile-name{font-size:16px!important;color:#20283a!important;margin:0 0 20px!important}.profile-name span{font-size:11px;color:#73809a;margin-left:8px}.profile-copy a{display:block;font-size:17px;color:#386bd5;margin:8px 0;text-decoration:none}.profile-copy a:hover{text-decoration:underline}.end-note{color:#fff}@media(max-width:650px){.contact-content{grid-template-columns:1fr;padding:28px;gap:28px}.profile-photo-wrap{height:250px;max-width:300px}.profile-copy h2{font-size:39px!important}.profile-copy a{font-size:16px}}`;
 document.head.append(finalContactStyles);
